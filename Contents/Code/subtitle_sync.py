@@ -5,6 +5,7 @@ Flow:
   PlexPoller  →  get active sessions from PMS API
               →  for each new session, resolve the selected subtitle file path
               →  run ffsubsync to compute and apply the correct offset
+              →  optionally translate subtitles to target language (argostranslate)
               →  refresh Plex metadata so the fixed sub is picked up immediately
 """
 
@@ -23,14 +24,25 @@ import os
 log = logging.getLogger('subtitle_autosync')
 
 
+def translate_subtitle_file(path: Path, target_lang: str, source_lang: str = 'en'):
+    """Translate subtitle file in-place."""
+    from .subtitle_translate import translate_srt
+    text = path.read_text(encoding='utf-8', errors='replace')
+    translated = translate_srt(text, target_lang=target_lang, source_lang=source_lang)
+    path.write_text(translated, encoding='utf-8')
+    log.info('Translated subtitle to [%s]: %s', target_lang, path.name)
+
+
 class PlexPoller:
     """Polls /status/sessions and syncs subtitles for newly-started playback."""
 
     def __init__(self, plex_url: str = 'http://localhost:32400', token: str = '',
-                 poll_interval: int = 15):
+                 poll_interval: int = 15, target_lang: str = '', source_lang: str = 'en'):
         self.base = plex_url.rstrip('/')
         self.token = token
         self.poll_interval = poll_interval
+        self.target_lang = target_lang
+        self.source_lang = source_lang
         # track sessions we've already processed: session_key → subtitle_stream_id
         self._processed: dict = {}
 
@@ -118,6 +130,8 @@ class PlexPoller:
         log.info('Syncing subtitles for: %s', Path(video_file).name)
         synced = run_ffsubsync(video_file, str(sub_file))
         if synced:
+            if self.target_lang:
+                translate_subtitle_file(sub_file, self.target_lang, self.source_lang)
             self._refresh(rating_key)
             log.info('Done — refreshed Plex metadata for %s', rating_key)
         else:

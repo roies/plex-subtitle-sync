@@ -10,8 +10,10 @@ log = logging.getLogger('subtitle_autosync')
 class SubtitleAutoFixPlugin:
     title = 'Subtitle Auto Fix'
 
-    def __init__(self, plex_url='http://localhost:32400', token='', poll_interval=15):
-        self.poller = PlexPoller(plex_url=plex_url, token=token, poll_interval=poll_interval)
+    def __init__(self, plex_url='http://localhost:32400', token='', poll_interval=15,
+                 target_lang='', source_lang='en'):
+        self.poller = PlexPoller(plex_url=plex_url, token=token, poll_interval=poll_interval,
+                                 target_lang=target_lang, source_lang=source_lang)
         self._running = False
 
     def start(self):
