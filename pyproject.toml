@@ -1,0 +1,19 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.backends.legacy:build"
+
+[project]
+name = "plex-subtitle-sync"
+version = "1.0.0"
+description = "Auto-fix Plex subtitle delay on playback — no config, no license required"
+readme = "README.txt"
+requires-python = ">=3.8"
+license = { text = "MIT" }
+dependencies = ["ffsubsync"]
+
+[project.scripts]
+plex-subtitle-sync = "run_daemon:main"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["Contents*"]

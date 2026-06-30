@@ -25,10 +25,19 @@ Requirements
 
 Quick start
 -----------
-  pip install ffsubsync
-  python run_daemon.py                               # local Plex, no auth
-  python run_daemon.py --token YOUR_PLEX_TOKEN       # with auth
-  python run_daemon.py --url http://192.168.1.5:32400 --token TOKEN
+  # Install everything in one command:
+  pip install git+https://github.com/roies/plex-subtitle-sync
+
+  # Then run:
+  plex-subtitle-sync                                 # local Plex, no auth
+  plex-subtitle-sync --token YOUR_PLEX_TOKEN         # with auth
+  plex-subtitle-sync --url http://192.168.1.5:32400 --token TOKEN
+
+  # Or clone and install locally:
+  git clone https://github.com/roies/plex-subtitle-sync
+  cd plex-subtitle-sync
+  pip install .
+  plex-subtitle-sync
 
 As a background service (Linux/systemd)
 ----------------------------------------
