@@ -37,7 +37,7 @@ class PlexPoller:
     """Polls /status/sessions and syncs subtitles for newly-started playback."""
 
     def __init__(self, plex_url: str = 'http://localhost:32400', token: str = '',
-                 poll_interval: int = 15, target_lang: str = '', source_lang: str = 'en'):
+                 poll_interval: int = 15, target_lang: str = 'he', source_lang: str = 'en'):
         self.base = plex_url.rstrip('/')
         self.token = token
         self.poll_interval = poll_interval

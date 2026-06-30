@@ -40,8 +40,8 @@ def main():
     parser.add_argument('--interval', type=int,
                         default=int(os.environ.get('POLL_INTERVAL', '15')),
                         help='Seconds between polls (default: 15)')
-    parser.add_argument('--target-lang', default=os.environ.get('TARGET_LANG', ''),
-                        help='Translate subtitles to this language code, e.g. he, fr, es')
+    parser.add_argument('--target-lang', default=os.environ.get('TARGET_LANG', 'he'),
+                        help='Translate subtitles to this language code (default: he)')
     parser.add_argument('--source-lang', default=os.environ.get('SOURCE_LANG', 'en'),
                         help='Source language of subtitles (default: en)')
     args = parser.parse_args()
