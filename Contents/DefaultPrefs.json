@@ -1,0 +1,7 @@
+{
+  "default_delay_ms": 0,
+  "scan_root": "",
+  "enabled": true,
+  "write_backup": true,
+  "subtitle_extensions": [".srt", ".vtt"]
+}

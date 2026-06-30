@@ -1,0 +1,17 @@
+[Unit]
+Description=Plex Subtitle Auto Sync
+After=plexmediaserver.service
+
+[Service]
+Type=simple
+# ponytail: adjust User and WorkingDirectory to match your setup
+User=plex
+WorkingDirectory=/opt/plex-subtitle-sync
+ExecStart=/usr/bin/python3 run_daemon.py
+Restart=on-failure
+RestartSec=10
+Environment=PLEX_URL=http://localhost:32400
+Environment=POLL_INTERVAL=15
+
+[Install]
+WantedBy=multi-user.target
