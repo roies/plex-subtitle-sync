@@ -3,9 +3,9 @@
 <plist version="1.0">
 <dict>
   <key>CFBundleIdentifier</key>
-  <string>com.local.subtitleautofix</string>
+  <string>com.local.plexautosubs</string>
   <key>CFBundleName</key>
-  <string>Subtitle Auto Fix</string>
+  <string>Plex Auto Subs</string>
   <key>CFBundleVersion</key>
   <string>1.0</string>
   <key>PlexPluginVersion</key>

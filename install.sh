@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# One-command installer for plex-subtitle-sync
-# Usage: curl -fsSL https://raw.githubusercontent.com/roies/plex-subtitle-sync/master/install.sh | bash
+# One-command installer for Plex Auto Subs
+# Usage: curl -fsSL https://raw.githubusercontent.com/roies/plex-auto-subs/master/install.sh | bash
 
 set -e
 
@@ -28,13 +28,13 @@ if ! command -v ffmpeg &>/dev/null; then
 fi
 
 # ── 3. pip install ────────────────────────────────────────────────────────────
-info "Installing plex-subtitle-sync..."
+info "Installing plex-auto-subs..."
 $PYTHON -m pip install --quiet --upgrade \
-    "git+https://github.com/roies/plex-subtitle-sync" \
+    "git+https://github.com/roies/plex-auto-subs" \
     ffsubsync argostranslate
 
-DAEMON=$(python3 -c "import sysconfig; print(sysconfig.get_path('scripts'))")/plex-subtitle-sync
-[ -f "$DAEMON" ] || DAEMON=$($PYTHON -m site --user-base)/bin/plex-subtitle-sync
+DAEMON=$(python3 -c "import sysconfig; print(sysconfig.get_path('scripts'))")/plex-auto-subs
+[ -f "$DAEMON" ] || DAEMON=$($PYTHON -m site --user-base)/bin/plex-auto-subs
 
 # ── 4. Plex token ─────────────────────────────────────────────────────────────
 echo ""
@@ -47,13 +47,13 @@ read -rp "Plex URL [http://localhost:32400]: " PLEX_URL
 PLEX_URL="${PLEX_URL:-http://localhost:32400}"
 
 # ── 5. systemd service ────────────────────────────────────────────────────────
-SERVICE=/etc/systemd/system/plex-subtitle-sync.service
+SERVICE=/etc/systemd/system/plex-auto-subs.service
 CURRENT_USER=$(whoami)
 
 info "Writing systemd service to $SERVICE..."
 sudo tee "$SERVICE" > /dev/null <<EOF
 [Unit]
-Description=Plex Subtitle Auto Sync (sync + translate to Hebrew)
+Description=Plex Auto Subs — auto-sync and auto-translate subtitles on playback
 After=network.target
 
 [Service]
@@ -68,13 +68,13 @@ WantedBy=multi-user.target
 EOF
 
 sudo systemctl daemon-reload
-sudo systemctl enable --now plex-subtitle-sync
+sudo systemctl enable --now plex-auto-subs
 
 echo ""
 info "Done! Service is running."
 echo ""
-echo "  Status : sudo systemctl status plex-subtitle-sync"
-echo "  Logs   : sudo journalctl -u plex-subtitle-sync -f"
-echo "  Stop   : sudo systemctl stop plex-subtitle-sync"
+echo "  Status : sudo systemctl status plex-auto-subs"
+echo "  Logs   : sudo journalctl -u plex-auto-subs -f"
+echo "  Stop   : sudo systemctl stop plex-auto-subs"
 echo ""
 warn "First subtitle detected will download the en→he model (~100MB, one-time)."

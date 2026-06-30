@@ -1,65 +1,80 @@
-Subtitle Auto Fix
-==================
+Plex Auto Subs
+==============
 
-Automatically fixes subtitle offset for any subtitle active in Plex — including
-online/downloaded subtitles — without any user involvement.
+Automatically syncs AND translates subtitles while you watch — no buttons,
+no config files, no manual offsets, no API keys.
 
-How it works
+What it does
 ------------
-1. A daemon polls the Plex Media Server API (/status/sessions) every 15 seconds.
-2. When a video starts playing with a subtitle selected, the daemon:
-   a. Gets the subtitle file path from the PMS API (works for local sidecars AND
-      online subtitles Plex has downloaded to its cache).
-   b. Runs `ffsubsync` (MIT license) against the video's audio to auto-detect the
-      correct offset and rewrites the subtitle file in place.
-   c. Triggers a Plex metadata refresh so the fixed subtitle loads immediately.
-3. Each session+subtitle combo is only processed once (no repeated re-syncing).
+Every time you start playing something in Plex with a subtitle track selected:
 
-No config files. No manual delay values. No license required.
+  1. Detects the active subtitle (local sidecar OR online/downloaded subtitle)
+  2. Runs ffsubsync to auto-detect and fix the timing offset against the audio
+  3. Translates the subtitle from English to Hebrew using argostranslate
+     (fully offline after the first model download, ~100MB one-time)
+  4. Refreshes Plex metadata — the corrected, translated subtitle loads live
+
+Zero user involvement required. Works with any subtitle Plex can play.
 
 Requirements
 ------------
 - Python 3.8+
-- ffmpeg installed and on PATH (used by ffsubsync)
-- ffsubsync:  pip install ffsubsync
+- ffmpeg on PATH  (used by ffsubsync for audio analysis)
+- pip install git+https://github.com/roies/plex-auto-subs
 
-Quick start
------------
-  # Install everything in one command:
-  pip install git+https://github.com/roies/plex-subtitle-sync
+Quick install (Linux/macOS — where Plex lives)
+----------------------------------------------
+  curl -fsSL https://raw.githubusercontent.com/roies/plex-auto-subs/master/install.sh | bash
 
-  # Then run:
-  plex-subtitle-sync                                 # local Plex, no auth
-  plex-subtitle-sync --token YOUR_PLEX_TOKEN         # with auth
-  plex-subtitle-sync --url http://192.168.1.5:32400 --token TOKEN
+That's it. The script installs Python/ffmpeg if missing, installs the package,
+asks for your Plex token, and registers a systemd service that starts on boot.
 
-  # Or clone and install locally:
-  git clone https://github.com/roies/plex-subtitle-sync
-  cd plex-subtitle-sync
-  pip install .
-  plex-subtitle-sync
+Manual install
+--------------
+  pip install git+https://github.com/roies/plex-auto-subs
+  plex-auto-subs                                 # local Plex, no auth needed
+  plex-auto-subs --token YOUR_PLEX_TOKEN         # remote or authenticated
+  plex-auto-subs --url http://192.168.1.5:32400 --token TOKEN
 
-As a background service (Linux/systemd)
-----------------------------------------
-  sudo cp subtitle-autosync.service /etc/systemd/system/
-  sudo systemctl daemon-reload
-  sudo systemctl enable --now subtitle-autosync
+Service management (after install.sh)
+--------------------------------------
+  sudo systemctl status plex-auto-subs
+  sudo journalctl -u plex-auto-subs -f     # live logs
+  sudo systemctl stop plex-auto-subs
+  sudo systemctl restart plex-auto-subs
 
-Getting your Plex token (if needed)
--------------------------------------
-  Settings → Account → "Get your Plex token" (at the bottom of that page)
-  Or: https://support.plex.tv/articles/204059436
+Environment variables
+---------------------
+  PLEX_URL      — Plex server URL (default: http://localhost:32400)
+  PLEX_TOKEN    — Plex auth token (default: empty)
+  POLL_INTERVAL — seconds between polls (default: 15)
+  TARGET_LANG   — translate to this language code (default: he)
+  SOURCE_LANG   — subtitle source language (default: en)
+
+Change translation language
+----------------------------
+  plex-auto-subs --target-lang fr    # French
+  plex-auto-subs --target-lang es    # Spanish
+  plex-auto-subs --target-lang ar    # Arabic
+  TARGET_LANG=de plex-auto-subs      # German via env var
+
+  Disable translation:
+  plex-auto-subs --target-lang ''
+
+Getting your Plex token
+-----------------------
+  Plex Web → Settings → Account → scroll down → "Get your Plex token"
+  https://support.plex.tv/articles/204059436
 
 Online subtitle support
 -----------------------
-When you select an online subtitle in Plex, Plex downloads it and stores it
-locally. The daemon finds this cached file via the PMS API and syncs it.
-If the stream has no local path, the daemon downloads it and saves it as
-<videoname>.autosync.srt alongside the video, which Plex picks up as an
-external subtitle after the metadata refresh.
+  When you select an online subtitle in Plex, Plex downloads it to its cache.
+  plex-auto-subs finds this file via the PMS API and syncs + translates it.
+  If no local path exists, the subtitle is downloaded and saved alongside the
+  video as <videoname>.autosync.srt, which Plex picks up after metadata refresh.
 
 Tests
 -----
-  python -m pytest tests/            # requires ffsubsync installed
-  python tests/test_subtitle_sync.py # standalone, no pytest needed
+  python -m pytest tests/ -v
+
 

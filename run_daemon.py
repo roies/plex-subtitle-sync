@@ -1,18 +1,22 @@
 #!/usr/bin/env python3
 """
-Standalone daemon — run this directly (outside the Plex plugin host) if needed.
+Plex Auto Subs — standalone daemon.
+
+Polls Plex Media Server for active playback sessions, auto-syncs subtitle
+timing with ffsubsync, and auto-translates to Hebrew with argostranslate.
+Fully automatic — no user involvement needed.
 
 Usage:
-    python run_daemon.py
-    python run_daemon.py --url http://192.168.1.10:32400 --token YOUR_TOKEN
+    plex-auto-subs                                  # local Plex, no auth
+    plex-auto-subs --token YOUR_TOKEN               # with auth
+    plex-auto-subs --url http://192.168.1.5:32400 --token TOKEN
 
-Config via environment variables (alternative to flags):
+Config via environment variables:
     PLEX_URL      — default: http://localhost:32400
-    PLEX_TOKEN    — default: (empty, works for local unauthenticated connections)
+    PLEX_TOKEN    — default: (empty)
     POLL_INTERVAL — seconds between polls, default: 15
-    TARGET_LANG   — translate subtitles to this language code, e.g. 'he', 'fr', 'es'
-                    (default: empty = no translation)
-    SOURCE_LANG   — source language code (default: 'en')
+    TARGET_LANG   — translate to this language code, default: he (Hebrew)
+    SOURCE_LANG   — subtitle source language, default: en
 """
 
 import argparse
@@ -34,7 +38,7 @@ log = logging.getLogger('subtitle_autosync')
 
 
 def main():
-    parser = argparse.ArgumentParser(description='Plex subtitle auto-sync daemon')
+    parser = argparse.ArgumentParser(description='Plex Auto Subs — auto-sync and translate subtitles')
     parser.add_argument('--url', default=os.environ.get('PLEX_URL', 'http://localhost:32400'))
     parser.add_argument('--token', default=os.environ.get('PLEX_TOKEN', ''))
     parser.add_argument('--interval', type=int,
@@ -46,9 +50,9 @@ def main():
                         help='Source language of subtitles (default: en)')
     args = parser.parse_args()
 
-    log.info('Starting — PMS: %s  interval: %ds  translate: %s',
+    log.info('Plex Auto Subs starting — PMS: %s  interval: %ds  translate: %s',
              args.url, args.interval, args.target_lang or 'off')
-    log.info('Make sure ffsubsync is installed: pip install ffsubsync')
+    log.info('Requires: ffsubsync + argostranslate  (pip install plex-auto-subs)')
     if args.target_lang:
         log.info('Translation enabled (%s→%s) — install: pip install argostranslate',
                  args.source_lang, args.target_lang)
