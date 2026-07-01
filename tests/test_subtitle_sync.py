@@ -188,6 +188,40 @@ class TestHandleSession(unittest.TestCase):
 
             mock_refresh.assert_not_called()
 
+    def test_translation_uses_detected_subtitle_language(self):
+        poller = PlexPoller(target_lang='he')
+        with tempfile.TemporaryDirectory() as d:
+            video, sub = self._setup(d)
+            video_el = ET.fromstring(
+                f'<MediaContainer><Video sessionKey="1" ratingKey="42">'
+                f'<Media><Part file="{video}"><Stream streamType="3" id="1" selected="1" '
+                f'file="{sub}" language="fr"/></Part></Media></Video></MediaContainer>').find('Video')
+
+            with patch('Contents.Code.subtitle_sync.run_ffsubsync', return_value=True), \
+                 patch('Contents.Code.subtitle_sync.translate_subtitle_file') as mock_translate, \
+                 patch.object(poller, '_refresh'):
+                poller._handle_session(video_el)
+
+            self.assertEqual(mock_translate.call_count, 1)
+            self.assertEqual(mock_translate.call_args.args[1], 'he')
+            self.assertEqual(mock_translate.call_args.args[2], 'fr')
+
+    def test_translation_skipped_when_subtitle_is_already_target_language(self):
+        poller = PlexPoller(target_lang='he')
+        with tempfile.TemporaryDirectory() as d:
+            video, sub = self._setup(d)
+            video_el = ET.fromstring(
+                f'<MediaContainer><Video sessionKey="1" ratingKey="42">'
+                f'<Media><Part file="{video}"><Stream streamType="3" id="1" selected="1" '
+                f'file="{sub}" language="he"/></Part></Media></Video></MediaContainer>').find('Video')
+
+            with patch('Contents.Code.subtitle_sync.run_ffsubsync', return_value=True), \
+                 patch('Contents.Code.subtitle_sync.translate_subtitle_file') as mock_translate, \
+                 patch.object(poller, '_refresh'):
+                poller._handle_session(video_el)
+
+            mock_translate.assert_not_called()
+
     def test_duplicate_session_not_reprocessed(self):
         poller = PlexPoller()
         with tempfile.TemporaryDirectory() as d:

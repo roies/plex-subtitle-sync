@@ -10,7 +10,8 @@ Every time you start playing something in Plex with a subtitle track selected:
 
   1. Detects the active subtitle (local sidecar OR online/downloaded subtitle)
   2. Runs ffsubsync to auto-detect and fix the timing offset against the audio
-  3. Translates the subtitle from English to Hebrew using argostranslate
+  3. Translates the subtitle from the detected source language to your target
+     language (default: English to Hebrew) using argostranslate
      (fully offline after the first model download, ~100MB one-time)
   4. Refreshes Plex metadata — the corrected, translated subtitle loads live
 
@@ -60,6 +61,11 @@ Change translation language
 
   Disable translation:
   plex-auto-subs --target-lang ''
+
+  If Plex exposes the selected subtitle's language, plex-auto-subs uses that
+  as the source language automatically. Otherwise it falls back to
+  SOURCE_LANG / --source-lang (default: en). If the subtitle is already in
+  the target language, translation is skipped.
 
 Getting your Plex token
 -----------------------

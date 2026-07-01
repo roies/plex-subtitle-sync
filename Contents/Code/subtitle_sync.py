@@ -21,6 +21,8 @@ from pathlib import Path
 from typing import Optional
 import os
 
+from .subtitle_translate import normalize_language_code
+
 log = logging.getLogger('subtitle_autosync')
 
 _SUBTITLE_EXTENSIONS = {'.srt', '.vtt', '.ass', '.ssa', '.sub'}
@@ -174,8 +176,11 @@ class PlexPoller:
         log.info('Syncing subtitles for: %s', Path(video_file).name)
         synced = run_ffsubsync(video_file, str(sub_file))
         if synced:
-            if self.target_lang:
-                translate_subtitle_file(sub_file, self.target_lang, self.source_lang)
+            if self._should_translate_subtitle(selected_sub):
+                source_lang = self._detect_subtitle_language(selected_sub) or self.source_lang
+                translate_subtitle_file(sub_file, self.target_lang, source_lang)
+            else:
+                log.info('Skipping translation for subtitle %s', sub_file.name)
             self._refresh(rating_key)
             log.info('Done — refreshed Plex metadata for %s', rating_key)
         else:
@@ -186,6 +191,24 @@ class PlexPoller:
             if stream.get('streamType') == '3' and stream.get('selected') == '1':
                 return stream
         return None
+
+    def _detect_subtitle_language(self, stream: ET.Element) -> Optional[str]:
+        for attr_name in ('language', 'languageCode', 'languageTag'):
+            value = normalize_language_code(stream.get(attr_name))
+            if value:
+                return value
+        return None
+
+    def _should_translate_subtitle(self, stream: ET.Element) -> bool:
+        if not self.target_lang:
+            return False
+        detected_lang = self._detect_subtitle_language(stream)
+        source_lang = detected_lang or self.source_lang
+        normalized_source = normalize_language_code(source_lang) or source_lang
+        normalized_target = normalize_language_code(self.target_lang) or self.target_lang
+        if not normalized_source or not normalized_target:
+            return False
+        return normalized_source != normalized_target
 
     def _video_file_path(self, video: ET.Element) -> Optional[str]:
         for part in video.iter('Part'):

@@ -14,6 +14,24 @@ from typing import Optional
 
 log = logging.getLogger('subtitle_autosync')
 
+_LANGUAGE_ALIASES = {
+    'english': 'en', 'eng': 'en', 'en': 'en', 'en-us': 'en', 'en-gb': 'en',
+    'hebrew': 'he', 'heb': 'he', 'he': 'he',
+    'french': 'fr', 'fra': 'fr', 'fre': 'fr', 'fr': 'fr',
+    'spanish': 'es', 'spa': 'es', 'es': 'es',
+    'german': 'de', 'deu': 'de', 'de': 'de',
+    'arabic': 'ar', 'ara': 'ar', 'ar': 'ar',
+    'russian': 'ru', 'rus': 'ru', 'ru': 'ru',
+    'italian': 'it', 'ita': 'it', 'it': 'it',
+    'portuguese': 'pt', 'por': 'pt', 'pt': 'pt',
+    'turkish': 'tr', 'tur': 'tr', 'tr': 'tr',
+    'chinese': 'zh', 'zho': 'zh', 'zh': 'zh',
+    'japanese': 'ja', 'jpn': 'ja', 'ja': 'ja',
+    'korean': 'ko', 'kor': 'ko', 'ko': 'ko',
+    'dutch': 'nl', 'nld': 'nl', 'nl': 'nl',
+    'polish': 'pl', 'pol': 'pl', 'pl': 'pl',
+}
+
 # SRT block: index line, timestamp line(s), then text lines, then blank line
 _BLOCK_RE = re.compile(
     r'(\d+\n)'                                      # cue number
@@ -23,12 +41,26 @@ _BLOCK_RE = re.compile(
 )
 
 
+def normalize_language_code(lang: Optional[str]) -> Optional[str]:
+    """Normalize a language label to a short ISO-like code when possible."""
+    if not lang:
+        return None
+    normalized = lang.strip().lower().replace('_', '-')
+    if not normalized or normalized == 'und':
+        return None
+    if '-' in normalized:
+        normalized = normalized.split('-', 1)[0]
+    return _LANGUAGE_ALIASES.get(normalized, normalized)
+
+
 def translate_srt(srt_text: str, target_lang: str, source_lang: str = 'en') -> str:
     """Translate all subtitle text lines in an SRT string, preserve timestamps."""
-    if target_lang == source_lang:
+    normalized_source = normalize_language_code(source_lang) or source_lang
+    normalized_target = normalize_language_code(target_lang) or target_lang
+    if normalized_target == normalized_source:
         return srt_text
 
-    translator = _get_translator(source_lang, target_lang)
+    translator = _get_translator(normalized_source, normalized_target)
     if translator is None:
         log.error('No argostranslate model for %s→%s — skipping translation', source_lang, target_lang)
         return srt_text
@@ -37,7 +69,6 @@ def translate_srt(srt_text: str, target_lang: str, source_lang: str = 'en') -> s
         index_line = match.group(1)
         ts_line    = match.group(2)
         text_block = match.group(3)
-        # strip HTML-like tags before translating, restore after
         translated = translator.translate(text_block.strip())
         return f'{index_line}{ts_line}{translated}\n'
 

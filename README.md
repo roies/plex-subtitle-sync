@@ -8,7 +8,7 @@ Every time you start playing something in Plex with a subtitle selected:
 
 1. 🎯 **Detects** the active subtitle (local sidecar or online/downloaded)
 2. ⏱️ **Fixes the timing** using [ffsubsync](https://github.com/smacke/ffsubsync) — analyzes the audio and auto-corrects the offset
-3. 🌐 **Translates** from English → Hebrew using [argostranslate](https://github.com/argosopentech/argostranslate) (fully offline after first run)
+3. 🌐 **Translates** from the subtitle’s detected language to your target language (default: English → Hebrew) using [argostranslate](https://github.com/argosopentech/argostranslate) (fully offline after first run)
 4. 🔄 **Refreshes Plex** so the corrected subtitle loads live
 
 Zero user involvement. Works for any subtitle Plex can play.
@@ -77,6 +77,8 @@ plex-auto-subs --target-lang es    # Spanish
 plex-auto-subs --target-lang ar    # Arabic
 plex-auto-subs --target-lang ''    # Disable translation (sync only)
 ```
+
+If Plex exposes the selected subtitle’s language, the daemon uses that as the source language automatically. Otherwise it falls back to `--source-lang` / `SOURCE_LANG` (default: `en`). If the subtitle is already in the target language, translation is skipped.
 
 > First run per language pair downloads a ~100MB model. Fully offline after that.
 

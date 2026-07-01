@@ -5,7 +5,7 @@ from unittest.mock import MagicMock, patch
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from Contents.Code.subtitle_translate import translate_srt
+from Contents.Code.subtitle_translate import normalize_language_code, translate_srt
 
 SAMPLE_SRT = """\
 1
@@ -60,6 +60,11 @@ class TestTranslateSrt(unittest.TestCase):
         with patch('Contents.Code.subtitle_translate._get_translator', return_value=None):
             result = translate_srt(SAMPLE_SRT, target_lang='de')
         self.assertEqual(result, SAMPLE_SRT)
+
+    def test_normalize_language_code_supports_common_aliases(self):
+        self.assertEqual(normalize_language_code('English'), 'en')
+        self.assertEqual(normalize_language_code('HEBREW'), 'he')
+        self.assertEqual(normalize_language_code('pt-BR'), 'pt')
 
 
 class TestGetTranslator(unittest.TestCase):
