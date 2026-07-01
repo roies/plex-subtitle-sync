@@ -3,7 +3,8 @@ param(
     [string]$PlexUrl = "http://localhost:32400",
     [string]$TargetLang = "he",
     [string]$SourceLang = "en",
-    [int]$PollInterval = 15
+    [int]$PollInterval = 15,
+    [string]$ReleaseTag = "v1.1.0"
 )
 
 $ErrorActionPreference = 'Stop'
@@ -38,7 +39,7 @@ if (-not (Require-Command 'ffmpeg')) {
 }
 
 Write-Info 'Installing plex-auto-subs and dependencies...'
-& $PythonExe -m pip install --upgrade "git+https://github.com/roies/plex-auto-subs" ffsubsync argostranslate
+& $PythonExe -m pip install --upgrade "git+https://github.com/roies/plex-auto-subs@$ReleaseTag" ffsubsync argostranslate
 
 $ScriptsDir = & $PythonExe -c "import sysconfig; print(sysconfig.get_path('scripts'))"
 $DaemonPath = Join-Path $ScriptsDir 'plex-auto-subs.exe'

@@ -2,9 +2,9 @@
 # One-command installer for Plex Auto Subs
 #
 # SECURITY NOTE: Review this script before running it.
-# Pinned commit: https://github.com/roies/plex-auto-subs
+# Release pin: https://github.com/roies/plex-auto-subs/releases/tag/v1.1.0
 #
-# Usage: curl -fsSL https://raw.githubusercontent.com/roies/plex-auto-subs/master/install.sh | bash
+# Usage: curl -fsSL https://raw.githubusercontent.com/roies/plex-auto-subs/v1.1.0/install.sh | bash
 
 set -e
 
@@ -34,7 +34,7 @@ fi
 # ── 3. pip install ────────────────────────────────────────────────────────────
 info "Installing plex-auto-subs..."
 $PYTHON -m pip install --upgrade \
-    "git+https://github.com/roies/plex-auto-subs" \
+    "git+https://github.com/roies/plex-auto-subs@v1.1.0" \
     ffsubsync argostranslate
 
 DAEMON=$($PYTHON -c "import sysconfig; print(sysconfig.get_path('scripts'))")/plex-auto-subs

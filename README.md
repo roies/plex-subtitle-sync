@@ -35,7 +35,7 @@ Do not use this tool to access or redistribute copyrighted content without permi
 Run this on your Plex server:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/roies/plex-auto-subs/master/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/roies/plex-auto-subs/v1.1.0/install.sh | bash
 ```
 
 The script will:
@@ -49,13 +49,13 @@ The script will:
 For a one-time run from PowerShell:
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File .\run-windows.ps1
+powershell -ExecutionPolicy Bypass -File .\run-windows.ps1 -ReleaseTag v1.1.0
 ```
 
 For a persistent install that starts at boot:
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File .\install-windows.ps1
+powershell -ExecutionPolicy Bypass -File .\install-windows.ps1 -ReleaseTag v1.1.0
 ```
 
 The scripts will:

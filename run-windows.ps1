@@ -3,7 +3,8 @@ param(
     [string]$PlexUrl = "http://localhost:32400",
     [string]$TargetLang = "he",
     [string]$SourceLang = "en",
-    [int]$PollInterval = 15
+    [int]$PollInterval = 15,
+    [string]$ReleaseTag = "v1.1.0"
 )
 
 $ErrorActionPreference = 'Stop'
@@ -33,7 +34,7 @@ if (-not $PlexUrl) {
 if (-not $PlexUrl) { $PlexUrl = 'http://localhost:32400' }
 
 Write-Info 'Installing/updating required packages...'
-& $PythonExe -m pip install --upgrade "git+https://github.com/roies/plex-auto-subs" ffsubsync argostranslate | Out-Null
+& $PythonExe -m pip install --upgrade "git+https://github.com/roies/plex-auto-subs@$ReleaseTag" ffsubsync argostranslate | Out-Null
 
 Write-Info 'Starting plex-auto-subs...'
 $env:PLEX_URL = $PlexUrl

@@ -41,19 +41,19 @@ Requirements
 
 Quick install (Linux/macOS — where Plex lives)
 ----------------------------------------------
-  curl -fsSL https://raw.githubusercontent.com/roies/plex-auto-subs/master/install.sh | bash
+  curl -fsSL https://raw.githubusercontent.com/roies/plex-auto-subs/v1.1.0/install.sh | bash
 
 That's it. The script installs Python/ffmpeg if missing, installs the package,
 asks for your Plex token, and registers a systemd service that starts on boot.
 
 Windows install
 ---------------
-  powershell -ExecutionPolicy Bypass -File .\run-windows.ps1
+  powershell -ExecutionPolicy Bypass -File .\run-windows.ps1 -ReleaseTag v1.1.0
 
 For a one-time run from PowerShell. For a persistent install that starts at
 boot, use:
 
-  powershell -ExecutionPolicy Bypass -File .\install-windows.ps1
+  powershell -ExecutionPolicy Bypass -File .\install-windows.ps1 -ReleaseTag v1.1.0
 
 The PowerShell scripts check for Python/ffmpeg, install the package and
 dependencies, ask for your Plex token and URL, and either start the daemon
