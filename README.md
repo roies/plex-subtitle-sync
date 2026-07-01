@@ -46,17 +46,23 @@ The script will:
 
 ### Windows
 
-From PowerShell, run:
+For a one-time run from PowerShell:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\run-windows.ps1
+```
+
+For a persistent install that starts at boot:
 
 ```powershell
 powershell -ExecutionPolicy Bypass -File .\install-windows.ps1
 ```
 
-The script will:
+The scripts will:
 - Check for Python and ffmpeg
 - Install the package and dependencies
 - Ask for your Plex token and URL
-- Create a Windows scheduled task that starts the daemon at boot
+- Start the daemon immediately (run script) or create a Windows scheduled task (install script)
 
 ---
 

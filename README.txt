@@ -48,11 +48,16 @@ asks for your Plex token, and registers a systemd service that starts on boot.
 
 Windows install
 ---------------
+  powershell -ExecutionPolicy Bypass -File .\run-windows.ps1
+
+For a one-time run from PowerShell. For a persistent install that starts at
+boot, use:
+
   powershell -ExecutionPolicy Bypass -File .\install-windows.ps1
 
-The PowerShell script checks for Python/ffmpeg, installs the package and
-dependencies, asks for your Plex token and URL, and creates a Windows
-scheduled task that starts the daemon at boot.
+The PowerShell scripts check for Python/ffmpeg, install the package and
+dependencies, ask for your Plex token and URL, and either start the daemon
+immediately or create a Windows scheduled task that starts it at boot.
 
 Manual install
 --------------
