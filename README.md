@@ -123,6 +123,16 @@ plex-auto-subs --check
 
 This validates the local runtime (Python, ffsubsync, argostranslate model support) and checks whether Plex responds at the configured URL/token before the daemon starts.
 
+### Config file
+
+You can store settings in a JSON file and point the daemon at it:
+
+```bash
+plex-auto-subs --config /path/to/plex-auto-subs.json
+```
+
+A sample file is included as [config.example.json](config.example.json). Supported keys are `url`, `token`, `interval`, `target_lang`, and `source_lang`.
+
 > First run per language pair downloads a ~100MB model. Fully offline after that.
 
 ---

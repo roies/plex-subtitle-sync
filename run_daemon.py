@@ -20,6 +20,7 @@ Config via environment variables:
 """
 
 import argparse
+import json
 import logging
 import os
 import shutil
@@ -27,6 +28,7 @@ import sys
 import time
 import urllib.request
 from pathlib import Path
+from typing import Optional
 
 sys.path.insert(0, str(Path(__file__).parent))
 
@@ -38,6 +40,44 @@ logging.basicConfig(
     format='%(asctime)s [subtitle_autosync] %(levelname)s %(message)s',
 )
 log = logging.getLogger('subtitle_autosync')
+
+DEFAULT_CONFIG_PATH = Path.home() / '.plex-auto-subs.json'
+
+
+def load_config(config_path: Optional[Path] = None) -> dict:
+    path = config_path or DEFAULT_CONFIG_PATH
+    if not path.exists():
+        return {}
+    try:
+        with path.open('r', encoding='utf-8') as handle:
+            data = json.load(handle)
+    except (json.JSONDecodeError, OSError) as exc:
+        log.warning('Could not read config %s: %s', path, exc)
+        return {}
+    if not isinstance(data, dict):
+        raise ValueError('Config must be a JSON object')
+    return data
+
+
+def resolve_runtime_settings(args, config: dict, env: Optional[dict] = None) -> dict:
+    env = env or os.environ
+    return {
+        'url': _pick_value(args.url, config.get('url') or config.get('plex_url'), env.get('PLEX_URL'), 'http://localhost:32400'),
+        'token': _pick_value(args.token, config.get('token'), env.get('PLEX_TOKEN'), ''),
+        'interval': _pick_value(args.interval, config.get('interval'), env.get('POLL_INTERVAL'), 15),
+        'target_lang': _pick_value(args.target_lang, config.get('target_lang'), env.get('TARGET_LANG'), 'he'),
+        'source_lang': _pick_value(args.source_lang, config.get('source_lang'), env.get('SOURCE_LANG'), 'en'),
+    }
+
+
+def _pick_value(cli_value, config_value, env_value, default):
+    if cli_value is not None:
+        return cli_value
+    if config_value is not None:
+        return config_value
+    if env_value is not None:
+        return env_value
+    return default
 
 
 def _check_environment(args):
@@ -92,18 +132,27 @@ def _check_environment(args):
 
 def main():
     parser = argparse.ArgumentParser(description='Plex Auto Subs — auto-sync and translate subtitles')
-    parser.add_argument('--url', default=os.environ.get('PLEX_URL', 'http://localhost:32400'))
-    parser.add_argument('--token', default=os.environ.get('PLEX_TOKEN', ''))
-    parser.add_argument('--interval', type=int,
-                        default=int(os.environ.get('POLL_INTERVAL', '15')),
+    parser.add_argument('--config', default=os.environ.get('PLEX_AUTO_SUBS_CONFIG', str(DEFAULT_CONFIG_PATH)),
+                        help='Path to a JSON config file (default: ~/.plex-auto-subs.json)')
+    parser.add_argument('--url', default=None)
+    parser.add_argument('--token', default=None)
+    parser.add_argument('--interval', type=int, default=None,
                         help='Seconds between polls (default: 15)')
-    parser.add_argument('--target-lang', default=os.environ.get('TARGET_LANG', 'he'),
+    parser.add_argument('--target-lang', default=None,
                         help='Translate subtitles to this language code (default: he)')
-    parser.add_argument('--source-lang', default=os.environ.get('SOURCE_LANG', 'en'),
+    parser.add_argument('--source-lang', default=None,
                         help='Source language of subtitles (default: en)')
     parser.add_argument('--check', action='store_true',
                         help='Run a preflight check and exit without starting the daemon')
     args = parser.parse_args()
+
+    config = load_config(Path(args.config))
+    settings = resolve_runtime_settings(args, config)
+    args.url = settings['url']
+    args.token = settings['token']
+    args.interval = settings['interval']
+    args.target_lang = settings['target_lang']
+    args.source_lang = settings['source_lang']
 
     if args.check:
         return _check_environment(args)

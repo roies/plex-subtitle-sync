@@ -104,6 +104,15 @@ Preflight check
   support) and checks whether Plex responds at the configured URL/token before
   the daemon starts.
 
+Config file
+-----------
+  You can store settings in a JSON file and point the daemon at it:
+
+     plex-auto-subs --config /path/to/plex-auto-subs.json
+
+  A sample file is included as config.example.json. Supported keys are url,
+  token, interval, target_lang, and source_lang.
+
 Getting your Plex token
 -----------------------
   Plex Web → Settings → Account → scroll down → "Get your Plex token"
