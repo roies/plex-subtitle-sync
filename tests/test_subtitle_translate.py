@@ -5,7 +5,7 @@ from unittest.mock import MagicMock, patch
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from Contents.Code.subtitle_translate import normalize_language_code, translate_srt
+from Contents.Code.subtitle_translate import normalize_language_code, should_translate_text, translate_srt
 
 SAMPLE_SRT = """\
 1
@@ -65,6 +65,11 @@ class TestTranslateSrt(unittest.TestCase):
         self.assertEqual(normalize_language_code('English'), 'en')
         self.assertEqual(normalize_language_code('HEBREW'), 'he')
         self.assertEqual(normalize_language_code('pt-BR'), 'pt')
+
+    def test_should_translate_text_rejects_short_or_non_latin_content(self):
+        self.assertFalse(should_translate_text('Hi'))
+        self.assertFalse(should_translate_text('שלום עולם'))
+        self.assertTrue(should_translate_text('This is a longer English sentence that should be translated.'))
 
 
 class TestGetTranslator(unittest.TestCase):

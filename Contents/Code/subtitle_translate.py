@@ -12,6 +12,8 @@ import logging
 import re
 from typing import Optional
 
+import unicodedata
+
 log = logging.getLogger('subtitle_autosync')
 
 _LANGUAGE_ALIASES = {
@@ -40,6 +42,8 @@ _BLOCK_RE = re.compile(
     re.MULTILINE,
 )
 
+_MIN_TRANSLATABLE_CHARS = 4
+
 
 def normalize_language_code(lang: Optional[str]) -> Optional[str]:
     """Normalize a language label to a short ISO-like code when possible."""
@@ -51,6 +55,21 @@ def normalize_language_code(lang: Optional[str]) -> Optional[str]:
     if '-' in normalized:
         normalized = normalized.split('-', 1)[0]
     return _LANGUAGE_ALIASES.get(normalized, normalized)
+
+
+def should_translate_text(text: str) -> bool:
+    """Return False for clearly non-translatable or already-local text."""
+    cleaned = re.sub(r'\s+', ' ', text).strip()
+    if len(cleaned) < _MIN_TRANSLATABLE_CHARS:
+        return False
+    if not any(ch.isalpha() for ch in cleaned):
+        return False
+
+    letters = [ch for ch in cleaned if ch.isalpha()]
+    latin_ratio = sum(1 for ch in letters if unicodedata.name(ch, '').startswith(('LATIN', 'COMMON'))) / max(1, len(letters))
+    if latin_ratio < 0.6:
+        return False
+    return True
 
 
 def translate_srt(srt_text: str, target_lang: str, source_lang: str = 'en') -> str:
@@ -69,6 +88,8 @@ def translate_srt(srt_text: str, target_lang: str, source_lang: str = 'en') -> s
         index_line = match.group(1)
         ts_line    = match.group(2)
         text_block = match.group(3)
+        if not should_translate_text(text_block):
+            return f'{index_line}{ts_line}{text_block}'
         translated = translator.translate(text_block.strip())
         return f'{index_line}{ts_line}{translated}\n'
 
