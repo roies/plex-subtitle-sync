@@ -17,6 +17,22 @@ Every time you start playing something in Plex with a subtitle track selected:
 
 Zero user involvement required. Works with any subtitle Plex can play.
 
+Legal / usage note
+-------------------
+  This project is intended for lawful personal/home use and local subtitle
+  processing. It does not collect or transmit personal data by default; it
+  processes subtitle files on the machine running the daemon.
+
+  You remain responsible for complying with the Plex Terms of Service and the
+  terms of your media/service provider, copyright and related rights in the
+  media and subtitles you process, and local laws regarding translation,
+  distribution, and access control.
+
+  Do not use this tool to access or redistribute copyrighted content without
+  permission, or to bypass access controls or regional restrictions. This is
+  not legal advice; if you plan to use it in a business, enterprise, or
+  redistributed context, obtain appropriate legal review.
+
 Requirements
 ------------
 - Python 3.8+
